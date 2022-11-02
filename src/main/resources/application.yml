@@ -4,3 +4,6 @@ spring:
       host: localhost
       port: 27017
       database: requests
+      auto-index-creation: true
+user-settings:
+  drop-on-restart: false
