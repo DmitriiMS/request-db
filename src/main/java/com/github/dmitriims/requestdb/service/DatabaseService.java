@@ -1,12 +1,14 @@
 package com.github.dmitriims.requestdb.service;
 
 import com.github.dmitriims.requestdb.exceptions.*;
+import com.github.dmitriims.requestdb.model.ElasticRequest;
 import com.github.dmitriims.requestdb.model.Folder;
 import com.github.dmitriims.requestdb.model.Request;
 import com.github.dmitriims.requestdb.model.Tag;
 import com.github.dmitriims.requestdb.repositories.FolderRepository;
 import com.github.dmitriims.requestdb.repositories.RequestRepository;
 import com.github.dmitriims.requestdb.repositories.TagRepository;
+import com.github.dmitriims.requestdb.repositories.elasticsearch.ElasticRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,8 @@ public class DatabaseService {
     private final FolderRepository folderRepository;
     private final RequestRepository requestRepository;
     private final TagRepository tagRepository;
+    private final ElasticRequestRepository elasticRequestRepository;
+    private final ElasticService elasticService;
 
     public Request saveRequestToDb(String requestText) throws CustomRuntimeException {
         Request request = requestRepository.findByText(requestText);
@@ -28,7 +32,13 @@ public class DatabaseService {
             throw new CustomRuntimeException("Request: '" + request.getText() + "' is already added to the database.");
         }
         request = new Request(requestText);
-        return requestRepository.save(request);
+        request = requestRepository.save(request);
+
+        ElasticRequest eRequest = new ElasticRequest();
+        eRequest.setText(request.getText());
+        eRequest.setMongoId(request.getId());
+        elasticRequestRepository.save(eRequest);
+        return request;
     }
 
     public Tag saveTagToDb(String tagName) throws CustomRuntimeException {
@@ -111,11 +121,18 @@ public class DatabaseService {
         return requestRepository.findAllByFolder(optionalFolder.get());
     }
 
-    public List<Request>getRequestsByTagId(String tagId) throws CustomRuntimeException {
+    public List<Request> getRequestsByTagId(String tagId) throws CustomRuntimeException {
         Optional<Tag> optionalTag = tagRepository.findById(tagId);
         if(optionalTag.isEmpty()) {
             throw new CustomRuntimeException("No tag with id: " + tagId + " found in the database");
         }
         return requestRepository.findAllByTagsContaining(optionalTag.get());
+    }
+
+    public List<Request> searchRequestsByText(String query) {
+        List<String> requestIds = elasticService.performSearch(query);
+        List<Request> requests = new ArrayList<>();
+        requestRepository.findAllById(requestIds).forEach(requests::add);
+        return requests;
     }
 }

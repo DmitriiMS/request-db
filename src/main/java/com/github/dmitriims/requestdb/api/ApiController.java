@@ -6,8 +6,6 @@ import com.github.dmitriims.requestdb.model.Request;
 import com.github.dmitriims.requestdb.model.Tag;
 import com.github.dmitriims.requestdb.service.DatabaseService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.NoArgsConstructor;
@@ -125,6 +123,15 @@ public class ApiController {
     @PostMapping(value = "/getRequestsByTag", produces = "application/json")
     public ResponseEntity<List<Request>> getRequestsByFolder(@RequestBody(required = false) IncomingTag incomingTag) {
         return new ResponseEntity<>(databaseService.getRequestsByTagId(incomingTag.getTagId()), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Найти все запросы удовлетворяющие поисковому запросу", description = "Находит все запросы, у которых текст похож на поисковый запрос", operationId = "searchRequestsByText")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Запросы с подходящим текстом найдены"),
+    })
+    @PostMapping(value = "/searchRequestsByText", produces = "application/json")
+    public ResponseEntity<List<Request>> findRequestsByText(@RequestBody SearchText searchText) {
+        return new ResponseEntity<>(databaseService.searchRequestsByText(searchText.getSearchText()), HttpStatus.OK);
     }
 
 }
