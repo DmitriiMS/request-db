@@ -1,6 +1,7 @@
 package com.github.dmitriims.requestdb.api;
 
 import com.github.dmitriims.requestdb.dto.*;
+import com.github.dmitriims.requestdb.exceptions.CustomRuntimeException;
 import com.github.dmitriims.requestdb.model.Folder;
 import com.github.dmitriims.requestdb.model.Request;
 import com.github.dmitriims.requestdb.model.Tag;
@@ -35,6 +36,9 @@ public class ApiController {
     })
     @PostMapping(value = "/saveRequest", produces = "application/json")
     public ResponseEntity<Request> saveRequest(@RequestBody(required = false) IncomingRequest incomingRequest) {
+        if(incomingRequest == null || incomingRequest.getRequestText().isBlank()) {
+            throw new CustomRuntimeException("Пустой запрос.");
+        }
         return new ResponseEntity<>(databaseService.saveRequestToDb(incomingRequest.getRequestText()), HttpStatus.CREATED);
     }
 
@@ -45,6 +49,9 @@ public class ApiController {
     })
     @PostMapping(value = "/saveTag", produces = "application/json")
     public ResponseEntity<Tag> saveTag(@RequestBody(required = false) IncomingTag incomingTag) {
+        if(incomingTag == null || incomingTag.getTagName().isBlank()) {
+            throw new CustomRuntimeException("Пустой запрос.");
+        }
         return new ResponseEntity<>(databaseService.saveTagToDb(incomingTag.getTagName()), HttpStatus.CREATED);
     }
 
@@ -55,6 +62,9 @@ public class ApiController {
     })
     @PostMapping(value = "/saveFolder", produces = "application/json")
     public ResponseEntity<Folder> saveFolder(@RequestBody(required = false) IncomingFolder incomingFolder) {
+        if(incomingFolder == null || incomingFolder.getFolderName().isBlank()) {
+            throw new CustomRuntimeException("Пустой запрос.");
+        }
         return new ResponseEntity<>(databaseService.saveFolderToDb(incomingFolder.getFolderName()), HttpStatus.CREATED);
     }
 

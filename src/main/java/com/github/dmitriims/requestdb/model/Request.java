@@ -1,5 +1,6 @@
 package com.github.dmitriims.requestdb.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
@@ -13,6 +14,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Document("requests")
 @TypeAlias("request")
+@Schema(name = "Request", description = "Запрос")
 public class Request {
 
     @Id

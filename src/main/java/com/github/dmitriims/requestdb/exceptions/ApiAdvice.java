@@ -24,4 +24,15 @@ public class ApiAdvice {
                 HttpStatus.BAD_REQUEST
         );
     }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<OperationResponse> handleIllegalArgumentException(IllegalArgumentException iae) {
+        log.warn(iae.getMessage());
+        return new ResponseEntity<>(
+                new OperationResponse(false,
+                        iae.getLocalizedMessage()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
 }
